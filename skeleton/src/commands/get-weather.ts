@@ -46,7 +46,7 @@ export class GetWeatherCommand /*implements ICommand*/ {
         return tempToCelsius;
     }
     private toFahrenheit(temp: number): number {
-        const tempToFahrenheit = (temp * 1.8) + 32;
+        const tempToFahrenheit = ((temp - 273.15) * 1.8) + 32;
         return tempToFahrenheit;
     }
 
