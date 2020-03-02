@@ -1,0 +1,30 @@
+{
+  "name": "get-weather-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "deploy": "npm run build && npm i -g ."
+  },
+  "keywords": [],
+  "author": "Telerik Academy",
+  "license": "MIT",
+  "preferGlobal": true,
+  "bin": {
+    "getweather": "./dist/main.js"
+  },
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "minimist": "^1.2.0",
+    "reflect-metadata": "^0.1.13",
+    "typescript": "^3.7.4"
+  },
+  "devDependencies": {
+    "@types/reflect-metadata": "^0.1.0",
+    "@types/typescript": "^2.0.0",
+    "@types/chalk": "^2.2.0",
+    "@types/minimist": "^1.2.0",
+    "@types/node": "^13.1.6"
+  }
+}
