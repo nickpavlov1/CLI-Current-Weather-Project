@@ -22,7 +22,7 @@ export class GetWeatherCommand implements ICommand {
         try {
         this.validateParams(city);
         const result: number = await this.getCityWeather(city);
-        const resultDegreesConversion: string = this.isItFahrenheit(city, result, fahrenheit);
+        const resultDegreesConversion: string = this.setTemperature(city, result, fahrenheit);
         if (resultDegreesConversion) {
             this.consolePrinter.print(this.formatter.format(resultDegreesConversion, ColorType.Green));
         }
@@ -51,7 +51,6 @@ export class GetWeatherCommand implements ICommand {
             throw new Error(`Promise was NOT implemented.`);
         }
     }
-
     private toCelsius(temp: number): number {
         const tempToCelsius = temp - 273.15;
         return tempToCelsius;
@@ -60,18 +59,21 @@ export class GetWeatherCommand implements ICommand {
         const tempToFahrenheit = ((temp - 273.15) * 1.8) + 32;
         return tempToFahrenheit;
     }
-    private isItFahrenheit(city: string, temp: number, fahrenheit: boolean): string {
+    private setTemperature(city: string, temp: number, fahrenheit: boolean): string {
         if (fahrenheit === true) {
-            const cityWeatherFahrenheit = this.toFahrenheit(temp);
+            const cityWeatherFahrenheit: number = this.toFahrenheit(temp);
             return `The current temperature
-                    in ${city} is
+                    in ${this.capitalizeCityName(city)} is
                     ${cityWeatherFahrenheit.toFixed(1)} F°`;
         } else {
-            const cityWeatherCelsius = this.toCelsius(temp);
+            const cityWeatherCelsius: number = this.toCelsius(temp);
             return `The current temperature
-                    in ${city} is
+                    in ${this.capitalizeCityName(city)} is
                     ${cityWeatherCelsius.toFixed(1)} C°`;
         }
     }
-
+    private capitalizeCityName(city: string): string {
+        const cityCapitalized: string = city.charAt(0).toUpperCase() + city.slice(1);
+        return cityCapitalized;
+    }
 }
