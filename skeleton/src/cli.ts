@@ -3,9 +3,9 @@ import { ICommand } from './types/command';
 import { ArgumentsParser } from './core/arguments-parser.service';
 import { CommandContainer } from './commands/commands-container';
 import { ConsolePrinter } from './core/console-printer.service';
-import { HelpCommand } from './commands/help';
-import { GetWeatherCommand } from './commands/get-weather';
+import { Injectable } from './tools/decorators/injectable';
 
+@Injectable()
 export class CLI {
 
   constructor(

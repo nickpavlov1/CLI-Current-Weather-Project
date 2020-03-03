@@ -1,7 +1,9 @@
 import { ConsolePrinter } from './../core/console-printer.service';
 import { ICommand } from './../types/command';
 import { ExecutionResult } from '../types/execution-result';
+import { Injectable } from '../tools/decorators/injectable';
 
+@Injectable()
 export class HelpCommand implements ICommand {
 
   constructor(

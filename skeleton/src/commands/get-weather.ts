@@ -2,20 +2,37 @@ import { ConsolePrinter } from '../core/console-printer.service';
 import { FilePrinter } from '../core/file-printer.service';
 import { FormatterService } from '../core/formatter.service';
 import { ICommand } from '../types/command';
-import { IGetWeatherCommandParameters } from '../types/command-parameters/get-weather-command-parameters';
 import { monitorEventLoopDelay } from 'perf_hooks';
 import { CURRENT_WEATHER_URL, API_KEY } from '../common/api-urls';
+import { ColorType } from '../common/colors';
+import { CommandParameters } from '../types/command-parameters/command-parameters';
+import { ExecutionResult } from '../types/execution-result';
+import { Injectable } from '../tools/decorators/injectable';
 
-export class GetWeatherCommand /*implements ICommand*/ {
+@Injectable()
+export class GetWeatherCommand implements ICommand {
 
     constructor(
-    private readonly consolePrinter: ConsolePrinter,
-    private readonly filePrinter: FilePrinter,
+    public readonly consolePrinter: ConsolePrinter,
+    public readonly filePrinter: FilePrinter,
 
-    private readonly formatter: FormatterService,
+    public readonly formatter: FormatterService,
     ) {}
-    public async execute({city = 'Sofia', fahrenheit = false, wind = false, humidity = false}: IGetWeatherCommandParameters) {
-
+    public async execute({city = 'sofia', fahrenheit = false, wind = false, humidity = false}: CommandParameters): Promise<ExecutionResult> {
+        try {
+        this.validateParams(city);
+        const result: number = await this.getCityWeather(city);
+        const resultDegreesConversion: string = this.isItFahrenheit(city, result, fahrenheit);
+        if (resultDegreesConversion) {
+            this.consolePrinter.print(this.formatter.format(resultDegreesConversion, ColorType.Green));
+        }
+        return { errors: 0, message: undefined };
+    } catch (error) {
+        return {
+            errors: 1,
+            message: this.formatter.format(error.message, ColorType.Red),
+        };
+    }
     }
     private validateParams(city: string) {
         if (!city) {
@@ -25,22 +42,16 @@ export class GetWeatherCommand /*implements ICommand*/ {
         // throw new RangeError(`Please provide a proper day of the week!`);
         // }
     }
-    private async getCityWeather(city: string, fahrenheit: boolean = false): Promise<string> {
+    private async getCityWeather(city: string = 'sofia'): Promise<number> {
+        try {
         const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
-        const result = await cityWeather.json();
-        const inputCityWeather: number = result.main.temp;
-        if (fahrenheit === true) {
-            const cityWeatherFahrenheit = this.toFahrenheit(inputCityWeather);
-            return `The current temperature
-                    in ${city} is
-                    ${cityWeatherFahrenheit.toFixed(1)} F°`;
-        } else {
-            const cityWeatherCelsius = this.toCelsius(inputCityWeather);
-            return `The current temperature
-                    in ${city} is
-                    ${cityWeatherCelsius.toFixed(1)} C°`;
+        const responseTemp: number = (await cityWeather.json()).main.temp;
+        return responseTemp;
+        } catch (error) {
+            throw new Error(`Promise was NOT implemented.`);
         }
     }
+
     private toCelsius(temp: number): number {
         const tempToCelsius = temp - 273.15;
         return tempToCelsius;
@@ -48,6 +59,19 @@ export class GetWeatherCommand /*implements ICommand*/ {
     private toFahrenheit(temp: number): number {
         const tempToFahrenheit = ((temp - 273.15) * 1.8) + 32;
         return tempToFahrenheit;
+    }
+    private isItFahrenheit(city: string, temp: number, fahrenheit: boolean): string {
+        if (fahrenheit === true) {
+            const cityWeatherFahrenheit = this.toFahrenheit(temp);
+            return `The current temperature
+                    in ${city} is
+                    ${cityWeatherFahrenheit.toFixed(1)} F°`;
+        } else {
+            const cityWeatherCelsius = this.toCelsius(temp);
+            return `The current temperature
+                    in ${city} is
+                    ${cityWeatherCelsius.toFixed(1)} C°`;
+        }
     }
 
 }

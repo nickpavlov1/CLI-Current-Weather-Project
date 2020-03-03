@@ -18,8 +18,17 @@ export class ArgumentsParser implements IArgumentsParser {
     this._arguments = {};
 
     // parse and validate individual _arguments
-    if (args.f || args.fahrenheitd) {
+    if (args.f || args.fahrenheit) {
       this._arguments.fahrenheit = true;
+    }
+    if (args.w || args.wind) {
+      this._arguments.wind = true;
+    }
+    if (args.h || args.humidity) {
+        this._arguments.humidity = true;
+    }
+    if (args.city) {
+      this._arguments.city = args.city;
     }
 
     // use in case working with files, this will parse the correct filepath
