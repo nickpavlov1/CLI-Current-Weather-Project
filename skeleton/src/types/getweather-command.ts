@@ -5,4 +5,6 @@ export interface IGetWeatherCommand {
     setTemperature(temp: number, fahrenheit: boolean): number;
     capitalizeCityName(city: string): string;
     printTemperatureInfo(city: string, temp: number, fahrenheit: boolean): string;
+    getWindSpeed(city: string): Promise<number>;
+    getHumidityPercentage(city: string): Promise<number>;
 }

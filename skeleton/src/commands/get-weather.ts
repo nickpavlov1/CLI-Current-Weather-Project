@@ -1,7 +1,6 @@
 import { ConsolePrinter } from '../core/console-printer.service';
 import { FormatterService } from '../core/formatter.service';
 import { ICommand } from '../types/command';
-import { monitorEventLoopDelay } from 'perf_hooks';
 import { CURRENT_WEATHER_URL, API_KEY } from '../common/api-urls';
 import { ColorType } from '../common/colors';
 import { CommandParameters } from '../types/command-parameters/command-parameters';
