@@ -1,5 +1,4 @@
 import { ConsolePrinter } from '../core/console-printer.service';
-import { FilePrinter } from '../core/file-printer.service';
 import { FormatterService } from '../core/formatter.service';
 import { ICommand } from '../types/command';
 import { monitorEventLoopDelay } from 'perf_hooks';
@@ -8,13 +7,14 @@ import { ColorType } from '../common/colors';
 import { CommandParameters } from '../types/command-parameters/command-parameters';
 import { ExecutionResult } from '../types/execution-result';
 import { Injectable } from '../tools/decorators/injectable';
+import { IGetWeatherCommand } from '../types/getweather-command';
+import fetch from 'node-fetch';
 
 @Injectable()
-export class GetWeatherCommand implements ICommand {
+export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
 
     constructor(
     public readonly consolePrinter: ConsolePrinter,
-    public readonly filePrinter: FilePrinter,
 
     public readonly formatter: FormatterService,
     ) {}
@@ -22,9 +22,22 @@ export class GetWeatherCommand implements ICommand {
         try {
         this.validateParams(city);
         const result: number = await this.getCityWeather(city);
-        const resultDegreesConversion: string = this.setTemperature(city, result, fahrenheit);
-        if (resultDegreesConversion) {
-            this.consolePrinter.print(this.formatter.format(resultDegreesConversion, ColorType.Green));
+        if (fahrenheit === true) {
+            const resultDegreesConversion: number = this.setTemperature(result, fahrenheit);
+            this.consolePrinter.print(this.printTemperatureInfo(city, resultDegreesConversion) + ' F°');
+        } else if (fahrenheit === false) {
+            const resultDegreesConversion: number = this.setTemperature(result, fahrenheit);
+            this.consolePrinter.print(this.printTemperatureInfo(city, resultDegreesConversion) + ' C°');
+        }
+        if (wind === true) {
+            const currentWindSpeed = await this.getWindSpeed(city);
+            this.consolePrinter.print(`
+            Wind speed: ${currentWindSpeed} km/h`);
+        }
+        if (humidity === true) {
+            const currentHumidityPercentage = await this.getHumidityPercentage(city);
+            this.consolePrinter.print(`
+            Humidity percentage: ${currentHumidityPercentage}%`);
         }
         return { errors: 0, message: undefined };
     } catch (error) {
@@ -34,46 +47,54 @@ export class GetWeatherCommand implements ICommand {
         };
     }
     }
-    private validateParams(city: string) {
+    public validateParams(city: string) {
         if (!city) {
         throw new RangeError(`Can't find the city with the provided city name - ${city}`);
         }
-        // if (!day) {
-        // throw new RangeError(`Please provide a proper day of the week!`);
-        // }
     }
-    private async getCityWeather(city: string = 'sofia'): Promise<number> {
+    public async getCityWeather(city: string = 'sofia'): Promise<number> {
         try {
         const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
         const responseTemp: number = (await cityWeather.json()).main.temp;
         return responseTemp;
         } catch (error) {
-            throw new Error(`Promise was NOT implemented.`);
+            throw new Error(error);
         }
     }
-    private toCelsius(temp: number): number {
+    public toCelsius(temp: number): number {
         const tempToCelsius = temp - 273.15;
         return tempToCelsius;
     }
-    private toFahrenheit(temp: number): number {
+    public toFahrenheit(temp: number): number {
         const tempToFahrenheit = ((temp - 273.15) * 1.8) + 32;
         return tempToFahrenheit;
     }
-    private setTemperature(city: string, temp: number, fahrenheit: boolean): string {
+    public setTemperature(temp: number, fahrenheit: boolean): number {
         if (fahrenheit === true) {
             const cityWeatherFahrenheit: number = this.toFahrenheit(temp);
-            return `The current temperature
-                    in ${this.capitalizeCityName(city)} is
-                    ${cityWeatherFahrenheit.toFixed(1)} F°`;
+            return cityWeatherFahrenheit;
         } else {
             const cityWeatherCelsius: number = this.toCelsius(temp);
-            return `The current temperature
-                    in ${this.capitalizeCityName(city)} is
-                    ${cityWeatherCelsius.toFixed(1)} C°`;
+            return cityWeatherCelsius;
         }
     }
-    private capitalizeCityName(city: string): string {
+    public capitalizeCityName(city: string): string {
         const cityCapitalized: string = city.charAt(0).toUpperCase() + city.slice(1);
         return cityCapitalized;
     }
-}
+    public printTemperatureInfo(city: string, temp: number): string {
+            return `
+            The current temperature
+            in ${this.capitalizeCityName(city)} is ${temp.toFixed(1)}`;
+        }
+    public async getWindSpeed(city: string): Promise<number> {
+        const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
+        const responseWind: number = (await cityWeather.json()).wind.speed;
+        return responseWind;
+    }
+        public async getHumidityPercentage(city: string): Promise<number> {
+            const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
+            const responseHumidity: number = (await cityWeather.json()).main.humidity;
+            return responseHumidity;
+        }
+    }

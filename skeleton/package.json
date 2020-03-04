@@ -15,17 +15,18 @@
     "getweather": "./dist/main.js"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.5.5",
     "chalk": "^3.0.0",
-    "fetch": "^1.1.0",
     "minimist": "^1.2.0",
+    "node-fetch": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "typescript": "^3.7.4"
   },
   "devDependencies": {
-    "@types/reflect-metadata": "^0.1.0",
-    "@types/typescript": "^2.0.0",
     "@types/chalk": "^2.2.0",
     "@types/minimist": "^1.2.0",
-    "@types/node": "^13.1.6"
+    "@types/node": "^13.1.6",
+    "@types/reflect-metadata": "^0.1.0",
+    "@types/typescript": "^2.0.0"
   }
 }
