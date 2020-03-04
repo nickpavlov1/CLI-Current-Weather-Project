@@ -14,7 +14,6 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
 
     constructor(
     public readonly consolePrinter: ConsolePrinter,
-
     public readonly formatter: FormatterService,
     ) {}
     public async execute({city = 'sofia', fahrenheit = false, wind = false, humidity = false}: CommandParameters): Promise<ExecutionResult> {
@@ -24,7 +23,7 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
         if (fahrenheit === true) {
             const resultDegreesConversion: number = this.setTemperature(result, fahrenheit);
             this.consolePrinter.print(this.printTemperatureInfo(city, resultDegreesConversion) + ' F°');
-        } else if (fahrenheit === false) {
+        } else {
             const resultDegreesConversion: number = this.setTemperature(result, fahrenheit);
             this.consolePrinter.print(this.printTemperatureInfo(city, resultDegreesConversion) + ' C°');
         }
@@ -60,6 +59,24 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
             throw new Error(error);
         }
     }
+    public async getWindSpeed(city: string): Promise<number> {
+        try {
+        const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
+        const responseWind: number = (await cityWeather.json()).wind.speed;
+        return responseWind;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+    public async getHumidityPercentage(city: string): Promise<number> {
+        try {
+        const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
+        const responseHumidity: number = (await cityWeather.json()).main.humidity;
+        return responseHumidity;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
     public toCelsius(temp: number): number {
         const tempToCelsius = temp - 273.15;
         return tempToCelsius;
@@ -86,14 +103,5 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
             The current temperature
             in ${this.capitalizeCityName(city)} is ${temp.toFixed(1)}`;
         }
-    public async getWindSpeed(city: string): Promise<number> {
-        const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
-        const responseWind: number = (await cityWeather.json()).wind.speed;
-        return responseWind;
-    }
-        public async getHumidityPercentage(city: string): Promise<number> {
-            const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
-            const responseHumidity: number = (await cityWeather.json()).main.humidity;
-            return responseHumidity;
-        }
+
     }
