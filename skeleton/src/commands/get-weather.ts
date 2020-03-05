@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { ConsolePrinter } from '../core/console-printer.service';
 import { FormatterService } from '../core/formatter.service';
 import { ICommand } from '../types/command';
@@ -7,7 +8,6 @@ import { CommandParameters } from '../types/command-parameters/command-parameter
 import { ExecutionResult } from '../types/execution-result';
 import { Injectable } from '../tools/decorators/injectable';
 import { IGetWeatherCommand } from '../types/getweather-command';
-import fetch from 'node-fetch';
 
 @Injectable()
 export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
@@ -47,14 +47,18 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
     }
     public validateParams(city: string) {
         if (!city) {
-        throw new RangeError(`Can't find the city with the provided city name - ${city}`);
+        throw new Error(`Can't find the city with the provided city name - ${city}`);
         }
     }
     public async getCityWeather(city: string = 'sofia'): Promise<number> {
         try {
-        const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
-        const responseTemp: number = (await cityWeather.json()).main.temp;
-        return responseTemp;
+            const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
+            const responseTemp= await cityWeather.json();
+            if (responseTemp.cod === '404') {
+            throw new Error('No information for the provided city.')
+            } else {
+                return responseTemp.main.temp;
+            }
         } catch (error) {
             throw new Error(error);
         }
@@ -98,10 +102,9 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
         const cityCapitalized: string = city.charAt(0).toUpperCase() + city.slice(1);
         return cityCapitalized;
     }
-    public printTemperatureInfo(city: string, temp: number): string {
-            return `
+    public printTemperatureInfo(city: string, temp: number): string {      
+        return `
             The current temperature
             in ${this.capitalizeCityName(city)} is ${temp.toFixed(1)}`;
-        }
-
     }
+}
