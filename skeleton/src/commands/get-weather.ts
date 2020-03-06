@@ -24,13 +24,8 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
         try {
             this.validateParams(city);
             const result: number = await this.getCityWeather(city);
-            if (fahrenheit === true) {
                 const resultDegreesConversion: number = this.tempSetter.setTemperature(result, fahrenheit);
-                this.consolePrinter.print(this.capitalizePrinter.printTemperatureInfo(city, resultDegreesConversion) + ' F°');
-            } else {
-                const resultDegreesConversion: number = this.tempSetter.setTemperature(result, fahrenheit);
-                this.consolePrinter.print(this.capitalizePrinter.printTemperatureInfo(city, resultDegreesConversion) + ' C°');
-            }
+                this.consolePrinter.print(this.capitalizePrinter.printTemperatureInfo(city, resultDegreesConversion, fahrenheit));
             if (wind === true) {
                 const currentWindSpeed = await this.getWindSpeed(city);
                 this.consolePrinter.print(`
