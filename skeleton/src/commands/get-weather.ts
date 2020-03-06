@@ -8,26 +8,28 @@ import { CommandParameters } from '../types/command-parameters/command-parameter
 import { ExecutionResult } from '../types/execution-result';
 import { Injectable } from '../tools/decorators/injectable';
 import { IGetWeatherCommand } from '../types/getweather-command';
-import { ITemperatureSetter } from '../types/temperature-setter';
-import { ICapitalizedPrinter } from '../types/capitalized-city-name-printer';
+import { TemperatureSetter } from '../common/methods/temperature-setter';
+import { CapitalizedPrinter } from '../common/methods/capitalized-printer';
 
 @Injectable()
-export class GetWeatherCommand implements ICommand, IGetWeatherCommand, ITemperatureSetter, ICapitalizedPrinter {
+export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
 
     constructor(
     public readonly consolePrinter: ConsolePrinter,
     public readonly formatter: FormatterService,
+    public readonly tempSetter: TemperatureSetter,
+    public readonly capitalizePrinter: CapitalizedPrinter
     ) {}
     public async execute({city = 'sofia', fahrenheit = false, wind = false, humidity = false}: CommandParameters): Promise<ExecutionResult> {
         try {
             this.validateParams(city);
             const result: number = await this.getCityWeather(city);
             if (fahrenheit === true) {
-                const resultDegreesConversion: number = this.setTemperature(result, fahrenheit);
-                this.consolePrinter.print(this.printTemperatureInfo(city, resultDegreesConversion) + ' F°');
+                const resultDegreesConversion: number = this.tempSetter.setTemperature(result, fahrenheit);
+                this.consolePrinter.print(this.capitalizePrinter.printTemperatureInfo(city, resultDegreesConversion) + ' F°');
             } else {
-                const resultDegreesConversion: number = this.setTemperature(result, fahrenheit);
-                this.consolePrinter.print(this.printTemperatureInfo(city, resultDegreesConversion) + ' C°');
+                const resultDegreesConversion: number = this.tempSetter.setTemperature(result, fahrenheit);
+                this.consolePrinter.print(this.capitalizePrinter.printTemperatureInfo(city, resultDegreesConversion) + ' C°');
             }
             if (wind === true) {
                 const currentWindSpeed = await this.getWindSpeed(city);
@@ -82,31 +84,5 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand, ITempera
         } catch (error) {
             throw new Error(error);
         }
-    }
-    public toCelsius(temp: number): number {
-        const tempToCelsius = temp - 273.15;
-        return tempToCelsius;
-    }
-    public toFahrenheit(temp: number): number {
-        const tempToFahrenheit = ((temp - 273.15) * 1.8) + 32;
-        return tempToFahrenheit;
-    }
-    public setTemperature(temp: number, fahrenheit: boolean): number {
-        if (fahrenheit === true) {
-            const cityWeatherFahrenheit: number = this.toFahrenheit(temp);
-            return cityWeatherFahrenheit;
-        } else {
-            const cityWeatherCelsius: number = this.toCelsius(temp);
-            return cityWeatherCelsius;
-        }
-    }
-    public capitalizeCityName(city: string): string {
-        const cityCapitalized: string = city.charAt(0).toUpperCase() + city.slice(1);
-        return cityCapitalized;
-    }
-    public printTemperatureInfo(city: string, temp: number): string {      
-        return `
-                The current temperature
-                in ${this.capitalizeCityName(city)} is ${temp.toFixed(1)}`;
     }
 }
