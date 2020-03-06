@@ -1,4 +1,3 @@
-export interface ICapitalizedPrinter {
+export interface ICapitalize {
     capitalizeCityName(city: string): string;
-    printTemperatureInfo(city: string, temp: number, fahrenheit: boolean): string;
 }
