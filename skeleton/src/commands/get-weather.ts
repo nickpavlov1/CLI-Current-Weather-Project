@@ -8,12 +8,11 @@ import { CommandParameters } from '../types/command-parameters/command-parameter
 import { ExecutionResult } from '../types/execution-result';
 import { Injectable } from '../tools/decorators/injectable';
 import { IGetWeatherCommand } from '../types/getweather-command';
-import { ITemperatureConverter } from '../types/temperature-converter';
 import { ITemperatureSetter } from '../types/temperature-setter';
 import { ICapitalizedPrinter } from '../types/capitalized-city-name-printer';
 
 @Injectable()
-export class GetWeatherCommand implements ICommand, IGetWeatherCommand, ITemperatureConverter, ITemperatureSetter, ICapitalizedPrinter {
+export class GetWeatherCommand implements ICommand, IGetWeatherCommand, ITemperatureSetter, ICapitalizedPrinter {
 
     constructor(
     public readonly consolePrinter: ConsolePrinter,
