@@ -1,7 +1,6 @@
 import { IArgumentsParser } from './../types/core/arguments-parser';
 import { CommandParameters } from './../types/command-parameters/command-parameters';
 import minimist from 'minimist';
-import { join } from 'path';
 
 export class ArgumentsParser implements IArgumentsParser {
 
@@ -18,6 +17,9 @@ export class ArgumentsParser implements IArgumentsParser {
     this._arguments = {};
 
     // parse and validate individual _arguments
+    if (args.city) {
+      this._arguments.city = args.city;
+    }
     if (args.f || args.fahrenheit) {
       this._arguments.fahrenheit = true;
     }
@@ -27,14 +29,6 @@ export class ArgumentsParser implements IArgumentsParser {
     if (args.h || args.humidity) {
         this._arguments.humidity = true;
     }
-    if (args.city) {
-      this._arguments.city = args.city;
-    }
-
-    // use in case working with files, this will parse the correct filepath
-    // if (args.filename) {
-    //   this._arguments.filename = join(process.cwd(), args.filename);
-    // }
   }
 
   public get arguments(): CommandParameters {
@@ -44,5 +38,4 @@ export class ArgumentsParser implements IArgumentsParser {
   public get command(): string {
     return this._command;
   }
-
 }

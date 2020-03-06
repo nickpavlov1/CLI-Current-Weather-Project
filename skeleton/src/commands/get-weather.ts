@@ -8,9 +8,12 @@ import { CommandParameters } from '../types/command-parameters/command-parameter
 import { ExecutionResult } from '../types/execution-result';
 import { Injectable } from '../tools/decorators/injectable';
 import { IGetWeatherCommand } from '../types/getweather-command';
+import { ITemperatureConverter } from '../types/temperature-converter';
+import { ITemperatureSetter } from '../types/temperature-setter';
+import { ICapitalizedPrinter } from '../types/capitalized-city-name-printer';
 
 @Injectable()
-export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
+export class GetWeatherCommand implements ICommand, IGetWeatherCommand, ITemperatureConverter, ITemperatureSetter, ICapitalizedPrinter {
 
     constructor(
     public readonly consolePrinter: ConsolePrinter,
@@ -50,10 +53,10 @@ export class GetWeatherCommand implements ICommand, IGetWeatherCommand {
             throw new Error(`Provide proper input!`);
         }
     }
-    public async getCityWeather(city: string = 'sofia'): Promise<number> {
+    public async getCityWeather(city: string): Promise<number> {
         try {
             const cityWeather = await fetch(`${CURRENT_WEATHER_URL}${city}${API_KEY}`);
-            const responseTemp= await cityWeather.json();
+            const responseTemp = await cityWeather.json();
             if (responseTemp.cod === '404') {
                 throw new Error('No information for the provided city.')
             } else {
