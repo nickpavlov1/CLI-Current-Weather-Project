@@ -17,7 +17,7 @@
   "dependencies": {
     "@types/node-fetch": "^2.5.5",
     "chalk": "^3.0.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "node-fetch": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "typescript": "^3.7.4"
